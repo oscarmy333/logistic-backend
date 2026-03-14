@@ -1,0 +1,33 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: marvisareparto
+      POSTGRES_USER: marvisadbuser
+      POSTGRES_PASSWORD: 9bTi5SuF1OY6
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  logistic:
+    build: .
+    container_name: spring_logistic
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/marvisareparto
+      SPRING_DATASOURCE_USERNAME: marvisadbuser
+      SPRING_DATASOURCE_PASSWORD: 9bTi5SuF1OY6
+      APP_JWT_SECRET: VGhpc0lzQVN1cGVyU2VjcmV0S2V5Rm9ySldUMTIzNDU2Nzg5MDEyMzQ1Njc4OTA=
+      APP_JWT_EXPIRATION: 86400000
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
