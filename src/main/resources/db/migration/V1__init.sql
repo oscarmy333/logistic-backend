@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS liquidacion (
     CONSTRAINT fk_liquidacion_vendedor FOREIGN KEY (vendedor_id) REFERENCES vendedor(id)
 );
 
-INSERT INTO perfil_usuario(name) VALUES ('ROLE_ADMIN') ON CONFLICT (name) DO NOTHING;
-INSERT INTO perfil_usuario(name) VALUES ('ROLE_OPERADOR') ON CONFLICT (name) DO NOTHING;
-INSERT INTO perfil_usuario(name) VALUES ('ROLE_VENDEDOR') ON CONFLICT (name) DO NOTHING;
-INSERT INTO perfil_usuario(name) VALUES ('ROLE_REPARTIDOR') ON CONFLICT (name) DO NOTHING;
+INSERT INTO perfil_usuario(rol) VALUES ('ROLE_ADMIN') ON CONFLICT (rol) DO NOTHING;
+INSERT INTO perfil_usuario(rol) VALUES ('ROLE_OPERADOR') ON CONFLICT (rol) DO NOTHING;
+INSERT INTO perfil_usuario(rol) VALUES ('ROLE_VENDEDOR') ON CONFLICT (rol) DO NOTHING;
+INSERT INTO perfil_usuario(rol) VALUES ('ROLE_REPARTIDOR') ON CONFLICT (rol) DO NOTHING;
