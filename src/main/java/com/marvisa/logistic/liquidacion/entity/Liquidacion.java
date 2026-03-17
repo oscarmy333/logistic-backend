@@ -1,5 +1,6 @@
 package com.marvisa.logistic.liquidacion.entity;
 
+import com.marvisa.logistic.common.audit.AuditableEntity;
 import com.marvisa.logistic.vendedor.entity.Vendedor;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,7 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Liquidacion {
+public class Liquidacion extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,9 +29,6 @@ public class Liquidacion {
 
     @Column(nullable = false)
     private String estado;
-
-    //@Column(nullable = false)
-    //private Long vendedorId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vendedor_id", nullable = false)

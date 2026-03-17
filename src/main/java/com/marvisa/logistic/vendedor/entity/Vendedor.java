@@ -1,6 +1,7 @@
 package com.marvisa.logistic.vendedor.entity;
 
 
+import com.marvisa.logistic.common.audit.AuditableEntity;
 import com.marvisa.logistic.liquidacion.entity.Liquidacion;
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Vendedor {
+public class Vendedor extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

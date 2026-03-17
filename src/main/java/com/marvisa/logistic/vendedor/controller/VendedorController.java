@@ -3,6 +3,7 @@ package com.marvisa.logistic.vendedor.controller;
 
 import com.marvisa.logistic.common.response.ApiResponse;
 import com.marvisa.logistic.vendedor.dto.VendedorRequest;
+import com.marvisa.logistic.vendedor.dto.VendedorResponse;
 import com.marvisa.logistic.vendedor.entity.Vendedor;
 import com.marvisa.logistic.vendedor.service.VendedorService;
 import jakarta.validation.Valid;
@@ -19,7 +20,7 @@ public class VendedorController {
     private final VendedorService vendedorService;
 
     @GetMapping
-    public ApiResponse<List<Vendedor>> listar() {
+    public ApiResponse<List<VendedorResponse>> listar() {
         return new ApiResponse<>(true, "Lista de vendedores", vendedorService.listar());
     }
 

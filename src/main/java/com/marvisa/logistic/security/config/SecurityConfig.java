@@ -2,6 +2,7 @@ package com.marvisa.logistic.security.config;
 
 
 import com.marvisa.logistic.config.CorsConfig;
+import com.marvisa.logistic.security.jwt.JwtAuthenticationEntryPoint;
 import com.marvisa.logistic.security.jwt.JwtAuthenticationFilter;
 import com.marvisa.logistic.security.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -29,14 +29,16 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomUserDetailsService userDetailsService;
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
     private final CorsConfig corsConfig;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
@@ -48,12 +50,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/vendedores/**", "/api/liquidaciones/**").hasAnyRole("ADMIN", "OPERADOR")
                         .requestMatchers("/api/repartos/**", "/api/envios/**").hasAnyRole("ADMIN", "OPERADOR", "REPARTIDOR")
                         .requestMatchers("/api/productos/**", "/api/tipoproductos/**").hasAnyRole("ADMIN", "OPERADOR", "VENDEDOR")
-                        .requestMatchers("/api/clientes/**").authenticated()
+                        .requestMatchers("/api/clientes/**", "/api/documentos/**").hasAnyRole("ADMIN", "OPERADOR", "VENDEDOR", "REPARTIDOR")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .httpBasic(Customizer.withDefaults());
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -78,7 +79,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
         return config.getAuthenticationManager();
     }
 }

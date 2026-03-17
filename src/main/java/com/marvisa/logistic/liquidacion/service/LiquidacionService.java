@@ -2,7 +2,9 @@ package com.marvisa.logistic.liquidacion.service;
 
 import com.marvisa.logistic.common.exception.ResourceNotFoundException;
 import com.marvisa.logistic.liquidacion.dto.LiquidacionRequest;
+import com.marvisa.logistic.liquidacion.dto.LiquidacionResponse;
 import com.marvisa.logistic.liquidacion.entity.Liquidacion;
+import com.marvisa.logistic.liquidacion.mapper.LiquidacionMapper;
 import com.marvisa.logistic.liquidacion.repository.LiquidacionRepository;
 import com.marvisa.logistic.vendedor.entity.Vendedor;
 import com.marvisa.logistic.vendedor.repository.VendedorRepository;
@@ -17,17 +19,19 @@ public class LiquidacionService {
 
     private final LiquidacionRepository liquidacionRepository;
     private final VendedorRepository vendedorRepository;
+    private final LiquidacionMapper liquidacionMapper;
 
-    public List<Liquidacion> listar() {
-        return liquidacionRepository.findAll();
+    public List<LiquidacionResponse> listar() {
+        return liquidacionMapper.toResponseList(liquidacionRepository.findAll());
     }
 
-    public Liquidacion obtener(Long id) {
-        return liquidacionRepository.findById(id)
+    public LiquidacionResponse obtener(Long id) {
+        Liquidacion entity = liquidacionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Liquidación no encontrada con id: " + id));
+        return liquidacionMapper.toResponse(entity);
     }
 
-    public Liquidacion crear(LiquidacionRequest request) {
+    public LiquidacionResponse crear(LiquidacionRequest request) {
         Vendedor vendedor = vendedorRepository.findById(request.getVendedorId())
                 .orElseThrow(() -> new ResourceNotFoundException("Vendedor no encontrado con id: " + request.getVendedorId()));
 
@@ -35,15 +39,15 @@ public class LiquidacionService {
                 .fechaLiquidacion(request.getFechaLiquidacion())
                 .montoTotal(request.getMontoTotal())
                 .estado(request.getEstado())
-                //.vendedorId(request.getVendedorId())
                 .vendedor(vendedor)
                 .build();
 
-        return liquidacionRepository.save(liquidacion);
+        return liquidacionMapper.toResponse(liquidacionRepository.save(liquidacion));
     }
 
-    public Liquidacion actualizar(Long id, LiquidacionRequest request) {
-        Liquidacion liquidacion = obtener(id);
+    public LiquidacionResponse actualizar(Long id, LiquidacionRequest request) {
+        Liquidacion liquidacion = liquidacionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Liquidación no encontrada - sin actualizar: " + id));
 
         Vendedor vendedor = vendedorRepository.findById(request.getVendedorId())
                 .orElseThrow(() -> new ResourceNotFoundException("Vendedor no encontrado con id: " + request.getVendedorId()));
@@ -51,14 +55,14 @@ public class LiquidacionService {
         liquidacion.setFechaLiquidacion(request.getFechaLiquidacion());
         liquidacion.setMontoTotal(request.getMontoTotal());
         liquidacion.setEstado(request.getEstado());
-        //liquidacion.setVendedorId(request.getVendedorId());
         liquidacion.setVendedor(vendedor);
 
-        return liquidacionRepository.save(liquidacion);
+        return liquidacionMapper.toResponse(liquidacionRepository.save(liquidacion));
     }
 
     public void eliminar(Long id) {
-        //Liquidacion liquidacion = obtener(id);
-        liquidacionRepository.delete(obtener(id));
+        Liquidacion liquidacion = liquidacionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Liquidación no encontrada - sin eliminar: " + id));
+        liquidacionRepository.delete(liquidacion);
     }
 }

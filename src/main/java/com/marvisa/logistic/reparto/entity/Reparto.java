@@ -1,6 +1,7 @@
 package com.marvisa.logistic.reparto.entity;
 
 import com.marvisa.logistic.cliente.entity.Cliente;
+import com.marvisa.logistic.common.audit.AuditableEntity;
 import com.marvisa.logistic.envio.entity.Envio;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,7 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Reparto {
+public class Reparto extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,12 +28,6 @@ public class Reparto {
     private String estado;
 
     private String observacion;
-    /*
-        @Column(nullable = false)
-        private Long clienteId;
-
-        @Column(nullable = false)
-        private Long envioId;*/
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cliente_id", nullable = false)

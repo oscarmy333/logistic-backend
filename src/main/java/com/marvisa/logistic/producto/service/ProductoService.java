@@ -2,7 +2,9 @@ package com.marvisa.logistic.producto.service;
 
 import com.marvisa.logistic.common.exception.ResourceNotFoundException;
 import com.marvisa.logistic.producto.dto.ProductoRequest;
+import com.marvisa.logistic.producto.dto.ProductoResponse;
 import com.marvisa.logistic.producto.entity.Producto;
+import com.marvisa.logistic.producto.mapper.ProductoMapper;
 import com.marvisa.logistic.producto.repository.ProductoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,10 +15,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductoService {
 
-    private final ProductoRepository productoRepository;
+    private final boolean PRODUCTO_ACTIVO = true;
 
-    public List<Producto> listar() {
-        return productoRepository.findAll();
+    private final ProductoRepository productoRepository;
+    private final ProductoMapper productoMapper;
+
+    public List<ProductoResponse> listar() {
+        return productoMapper.toResponseList(productoRepository.findAll());
     }
 
     public Producto obtener(Long id) {
@@ -28,7 +33,7 @@ public class ProductoService {
         Producto producto = Producto.builder()
                 .nombre(request.getNombre())
                 .descripcion(request.getDescripcion())
-                .activo(request.getActivo() != null ? request.getActivo() : true)
+                .activo(request.getActivo() != null ? request.getActivo() : PRODUCTO_ACTIVO)
                 .build();
 
         return productoRepository.save(producto);

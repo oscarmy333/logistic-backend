@@ -1,5 +1,6 @@
 package com.marvisa.logistic.cliente.entity;
 
+import com.marvisa.logistic.common.audit.AuditableEntity;
 import com.marvisa.logistic.reparto.entity.Reparto;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Cliente {
+public class Cliente extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -3,7 +3,9 @@ package com.marvisa.logistic.vendedor.service;
 
 import com.marvisa.logistic.common.exception.ResourceNotFoundException;
 import com.marvisa.logistic.vendedor.dto.VendedorRequest;
+import com.marvisa.logistic.vendedor.dto.VendedorResponse;
 import com.marvisa.logistic.vendedor.entity.Vendedor;
+import com.marvisa.logistic.vendedor.mapper.VendedorMapper;
 import com.marvisa.logistic.vendedor.repository.VendedorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,10 +16,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VendedorService {
 
+    private final boolean VENDEDOR_ACTIVO = true;
     private final VendedorRepository vendedorRepository;
+    private final VendedorMapper vendedorMapper;
 
-    public List<Vendedor> listar() {
-        return vendedorRepository.findAll();
+    public List<VendedorResponse> listar() {
+        return vendedorMapper.toResponseList(vendedorRepository.findAll());
     }
 
     public Vendedor obtener(Long id) {
@@ -35,7 +39,7 @@ public class VendedorService {
                 .email(request.getEmail())
                 .direccion(request.getDireccion())
                 .usuario(request.getUsuario())
-                .activo(request.getActivo() != null ? request.getActivo() : true)
+                .activo(request.getActivo() != null ? request.getActivo() : VENDEDOR_ACTIVO)
                 .build();
 
         return vendedorRepository.save(vendedor);

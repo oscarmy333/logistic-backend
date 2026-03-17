@@ -2,7 +2,7 @@ package com.marvisa.logistic.liquidacion.controller;
 
 import com.marvisa.logistic.common.response.ApiResponse;
 import com.marvisa.logistic.liquidacion.dto.LiquidacionRequest;
-import com.marvisa.logistic.liquidacion.entity.Liquidacion;
+import com.marvisa.logistic.liquidacion.dto.LiquidacionResponse;
 import com.marvisa.logistic.liquidacion.service.LiquidacionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,22 +18,22 @@ public class LiquidacionController {
     private final LiquidacionService liquidacionService;
 
     @GetMapping
-    public ApiResponse<List<Liquidacion>> listar() {
+    public ApiResponse<List<LiquidacionResponse>> listar() {
         return new ApiResponse<>(true, "Lista de liquidaciones", liquidacionService.listar());
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<Liquidacion> obtener(@PathVariable Long id) {
+    public ApiResponse<LiquidacionResponse> obtener(@PathVariable Long id) {
         return new ApiResponse<>(true, "Liquidación encontrada", liquidacionService.obtener(id));
     }
 
     @PostMapping
-    public ApiResponse<Liquidacion> crear(@Valid @RequestBody LiquidacionRequest request) {
+    public ApiResponse<LiquidacionResponse> crear(@Valid @RequestBody LiquidacionRequest request) {
         return new ApiResponse<>(true, "Liquidación creada", liquidacionService.crear(request));
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<Liquidacion> actualizar(@PathVariable Long id, @Valid @RequestBody LiquidacionRequest request) {
+    public ApiResponse<LiquidacionResponse> actualizar(@PathVariable Long id, @Valid @RequestBody LiquidacionRequest request) {
         return new ApiResponse<>(true, "Liquidación actualizada", liquidacionService.actualizar(id, request));
     }
 

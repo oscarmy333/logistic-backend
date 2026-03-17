@@ -1,7 +1,7 @@
 package com.marvisa.logistic.cliente.controller;
 
 import com.marvisa.logistic.cliente.dto.ClienteRequest;
-import com.marvisa.logistic.cliente.entity.Cliente;
+import com.marvisa.logistic.cliente.dto.ClienteResponse;
 import com.marvisa.logistic.cliente.service.ClienteService;
 import com.marvisa.logistic.common.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -18,22 +18,22 @@ public class ClienteController {
     private final ClienteService clienteService;
 
     @GetMapping
-    public ApiResponse<List<Cliente>> listar() {
+    public ApiResponse<List<ClienteResponse>> listar() {
         return new ApiResponse<>(true, "Lista de clientes", clienteService.listar());
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<Cliente> obtener(@PathVariable Long id) {
+    public ApiResponse<ClienteResponse> obtener(@PathVariable Long id) {
         return new ApiResponse<>(true, "Cliente encontrado", clienteService.obtener(id));
     }
 
     @PostMapping
-    public ApiResponse<Cliente> crear(@Valid @RequestBody ClienteRequest request) {
+    public ApiResponse<ClienteResponse> crear(@Valid @RequestBody ClienteRequest request) {
         return new ApiResponse<>(true, "Cliente creado", clienteService.crear(request));
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<Cliente> actualizar(@PathVariable Long id, @Valid @RequestBody ClienteRequest request) {
+    public ApiResponse<ClienteResponse> actualizar(@PathVariable Long id, @Valid @RequestBody ClienteRequest request) {
         return new ApiResponse<>(true, "Cliente actualizado", clienteService.actualizar(id, request));
     }
 

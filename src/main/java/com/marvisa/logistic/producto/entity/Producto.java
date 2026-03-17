@@ -1,9 +1,8 @@
 package com.marvisa.logistic.producto.entity;
 
+import com.marvisa.logistic.common.audit.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.math.BigDecimal;
 
 @Entity
 @Table(schema = "public", name = "productos")
@@ -12,7 +11,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Producto {
+public class Producto extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,8 +25,6 @@ public class Producto {
     private String descripcion;
 
     private String presentacion;
-
-    //private TipoProducto tipoProducto;
 
     @Column(nullable = false)
     private Boolean activo;

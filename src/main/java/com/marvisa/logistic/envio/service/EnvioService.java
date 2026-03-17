@@ -2,7 +2,9 @@ package com.marvisa.logistic.envio.service;
 
 import com.marvisa.logistic.common.exception.ResourceNotFoundException;
 import com.marvisa.logistic.envio.dto.EnvioRequest;
+import com.marvisa.logistic.envio.dto.EnvioResponse;
 import com.marvisa.logistic.envio.entity.Envio;
+import com.marvisa.logistic.envio.mapper.EnvioMapper;
 import com.marvisa.logistic.envio.repository.EnvioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,17 +16,19 @@ import java.util.List;
 public class EnvioService {
 
     private final EnvioRepository envioRepository;
+    private final EnvioMapper envioMapper;
 
-    public List<Envio> listar() {
-        return envioRepository.findAll();
+    public List<EnvioResponse> listar() {
+        return envioMapper.toResponseList(envioRepository.findAll());
     }
 
-    public Envio obtener(Long id) {
-        return envioRepository.findById(id)
+    public EnvioResponse obtener(Long id) {
+         Envio entity = envioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Envío no encontrado con id: " + id));
+        return envioMapper.toResponse(entity);
     }
 
-    public Envio crear(EnvioRequest request) {
+    public EnvioResponse crear(EnvioRequest request) {
         Envio envio = Envio.builder()
                 .codigo(request.getCodigo())
                 .direccionOrigen(request.getDireccionOrigen())
@@ -33,22 +37,24 @@ public class EnvioService {
                 .fechaEnvio(request.getFechaEnvio())
                 .build();
 
-        return envioRepository.save(envio);
+        return envioMapper.toResponse(envioRepository.save(envio));
     }
 
-    public Envio actualizar(Long id, EnvioRequest request) {
-        Envio envio = obtener(id);
+    public EnvioResponse actualizar(Long id, EnvioRequest request) {
+        Envio envio = envioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Envío no encontrada con id: " + id));
         envio.setCodigo(request.getCodigo());
         envio.setDireccionOrigen(request.getDireccionOrigen());
         envio.setDireccionDestino(request.getDireccionDestino());
         envio.setEstado(request.getEstado());
         envio.setFechaEnvio(request.getFechaEnvio());
 
-        return envioRepository.save(envio);
+        return envioMapper.toResponse(envioRepository.save(envio));
     }
 
     public void eliminar(Long id) {
-        Envio envio = obtener(id);
+        Envio envio = envioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Envío no encontrada con id: " + id));
         envioRepository.delete(envio);
     }
 }

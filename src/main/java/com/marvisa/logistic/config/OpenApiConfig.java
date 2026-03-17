@@ -1,7 +1,5 @@
 package com.marvisa.logistic.config;
 
-
-import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -26,14 +24,6 @@ public class OpenApiConfig {
                                 .url("https://github.com/oscarmy333/")
                                 .email("oscar.meya@gmail.com"))
                         .license(new License().name("MIT").url("https://spdx.org/licenses/MIT.html")));
-    }
-
-    @Bean
-    public GroupedOpenApi publicApi() {
-        return GroupedOpenApi.builder()
-                .group("springshop-public")
-                .pathsToMatch("/public/**")
-                .build();
     }
 
 }
