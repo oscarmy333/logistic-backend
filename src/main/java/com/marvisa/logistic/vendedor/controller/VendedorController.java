@@ -1,6 +1,7 @@
 package com.marvisa.logistic.vendedor.controller;
 
 
+import com.marvisa.logistic.common.pagination.PageResponse;
 import com.marvisa.logistic.common.response.ApiResponse;
 import com.marvisa.logistic.vendedor.dto.VendedorRequest;
 import com.marvisa.logistic.vendedor.dto.VendedorResponse;
@@ -20,8 +21,19 @@ public class VendedorController {
     private final VendedorService vendedorService;
 
     @GetMapping
-    public ApiResponse<List<VendedorResponse>> listar() {
-        return new ApiResponse<>(true, "Lista de vendedores", vendedorService.listar());
+    public ApiResponse<PageResponse<VendedorResponse>> listar(
+            @RequestParam(required = false) String nombres,
+            @RequestParam(required = false) Boolean activo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ) {
+        return new ApiResponse<>(
+                true,
+                "Lista de vendedores",
+                vendedorService.listar(nombres, activo, page, size, sortBy, direction)
+        );
     }
 
     @GetMapping("/{id}")

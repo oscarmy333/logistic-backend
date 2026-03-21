@@ -2,15 +2,18 @@ package com.marvisa.logistic.vendedor.service;
 
 
 import com.marvisa.logistic.common.exception.ResourceNotFoundException;
+import com.marvisa.logistic.common.pagination.PageResponse;
 import com.marvisa.logistic.vendedor.dto.VendedorRequest;
 import com.marvisa.logistic.vendedor.dto.VendedorResponse;
 import com.marvisa.logistic.vendedor.entity.Vendedor;
 import com.marvisa.logistic.vendedor.mapper.VendedorMapper;
 import com.marvisa.logistic.vendedor.repository.VendedorRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,8 +23,33 @@ public class VendedorService {
     private final VendedorRepository vendedorRepository;
     private final VendedorMapper vendedorMapper;
 
-    public List<VendedorResponse> listar() {
-        return vendedorMapper.toResponseList(vendedorRepository.findAll());
+    public PageResponse<VendedorResponse> listar(String nombres, Boolean activo, int page, int size, String sortBy, String direction) {
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Vendedor> result;
+
+        if (nombres != null && !nombres.isBlank() && activo != null) {
+            result = vendedorRepository.findByDeletedFalseAndNombresContainingIgnoreCaseAndActivo(nombres, activo, pageable);
+        } else if (nombres != null && !nombres.isBlank()) {
+            result = vendedorRepository.findByDeletedFalseAndNombresContainingIgnoreCase(nombres, pageable);
+        } else if (activo != null) {
+            result = vendedorRepository.findByDeletedFalseAndActivo(activo, pageable);
+        } else {
+            result = vendedorRepository.findByDeletedFalse(pageable);
+        }
+
+        return new PageResponse<>(
+                vendedorMapper.toResponseList(result.getContent()),
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.isLast()
+        );
     }
 
     public Vendedor obtener(Long id) {

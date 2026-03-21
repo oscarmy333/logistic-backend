@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Service
@@ -19,8 +20,8 @@ public class JwtService {
     @Value("${app.jwt.secret}")
     private String secretKey;
 
-    @Value("${app.jwt.expiration}")
-    private long jwtExpiration;
+    @Value("${app.jwt.access-expiration}")
+    private long accessExpiration;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -31,9 +32,9 @@ public class JwtService {
         return resolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails, Map<String, Object> extraClaims) {
+    public String generateAccessToken(UserDetails userDetails, Map<String, Object> extraClaims) {
         Date now = new Date();
-        Date expiration = new Date(now.getTime() + jwtExpiration);
+        Date expiration = new Date(now.getTime() + accessExpiration);
 
         return Jwts.builder()
                 .claims(extraClaims)
@@ -44,8 +45,12 @@ public class JwtService {
                 .compact();
     }
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(userDetails, Map.of());
+    public String generateAccessToken(UserDetails userDetails) {
+        return generateAccessToken(userDetails, Map.of());
+    }
+
+    public String generateRefreshTokenValue() {
+        return UUID.randomUUID().toString() + "." + UUID.randomUUID();
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {

@@ -6,7 +6,12 @@ import com.marvisa.logistic.cliente.entity.Cliente;
 import com.marvisa.logistic.cliente.mapper.ClienteMapper;
 import com.marvisa.logistic.cliente.repository.ClienteRepository;
 import com.marvisa.logistic.common.exception.ResourceNotFoundException;
+import com.marvisa.logistic.common.pagination.PageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,8 +25,31 @@ public class ClienteService {
     private final ClienteRepository clienteRepository;
     private final ClienteMapper clienteMapper;
 
-    public List<ClienteResponse> listar() {
-        return clienteMapper.toResponseList(clienteRepository.findAll());
+    public PageResponse<ClienteResponse> listar(String nombres, Boolean activo, int page, int size, String sortBy, String direction) {
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Cliente> result;
+
+        if (nombres != null && !nombres.isBlank() && activo != null) {
+            result = clienteRepository.findByDeletedFalseAndNombresContainingIgnoreCaseAndActivo(nombres, activo, pageable);
+        } else if (activo != null) {
+            result = clienteRepository.findByDeletedFalseAndActivo(activo, pageable);
+        } else {
+            result = clienteRepository.findByDeletedFalse(pageable);
+        }
+
+        return new PageResponse<>(
+                clienteMapper.toResponseList(result.getContent()),
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.isLast()
+        );
     }
 
     public ClienteResponse obtener(Long id) {

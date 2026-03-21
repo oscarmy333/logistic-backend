@@ -1,10 +1,7 @@
 package com.marvisa.logistic.security.controller;
 
 import com.marvisa.logistic.common.response.ApiResponse;
-import com.marvisa.logistic.security.dto.AuthRequest;
-import com.marvisa.logistic.security.dto.AuthResponse;
-import com.marvisa.logistic.security.dto.RegisterRequest;
-import com.marvisa.logistic.security.dto.UserMeResponse;
+import com.marvisa.logistic.security.dto.*;
 import com.marvisa.logistic.security.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +23,17 @@ public class AuthController {
     @PostMapping("/login")
     public ApiResponse<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
         return new ApiResponse<>(true, "Login exitoso", authService.login(request));
+    }
+
+    @PostMapping("/refresh")
+    public ApiResponse<RefreshTokenResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        return new ApiResponse<>(true, "Token refrescado correctamente", authService.refresh(request));
+    }
+
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout(@Valid @RequestBody RefreshTokenRequest request) {
+        authService.logout(request);
+        return new ApiResponse<>(true, "Logout exitoso", null);
     }
 
     @GetMapping("/me")

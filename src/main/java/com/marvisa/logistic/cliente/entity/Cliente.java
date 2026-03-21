@@ -3,8 +3,13 @@ package com.marvisa.logistic.cliente.entity;
 import com.marvisa.logistic.common.audit.AuditableEntity;
 import com.marvisa.logistic.reparto.entity.Reparto;
 import jakarta.persistence.*;
-import lombok.*;
-
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +20,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SQLDelete(sql = "UPDATE cliente SET deleted = true, updated_at = now() WHERE id = ?")
+@SQLRestriction("deleted = false")
 public class Cliente extends AuditableEntity {
 
     @Id

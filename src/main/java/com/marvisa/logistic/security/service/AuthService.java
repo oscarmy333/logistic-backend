@@ -1,10 +1,8 @@
 package com.marvisa.logistic.security.service;
 
 import com.marvisa.logistic.common.exception.BadRequestException;
-import com.marvisa.logistic.security.dto.AuthRequest;
-import com.marvisa.logistic.security.dto.AuthResponse;
-import com.marvisa.logistic.security.dto.RegisterRequest;
-import com.marvisa.logistic.security.dto.UserMeResponse;
+import com.marvisa.logistic.security.dto.*;
+import com.marvisa.logistic.security.entity.RefreshToken;
 import com.marvisa.logistic.security.entity.Role;
 import com.marvisa.logistic.security.entity.RoleName;
 import com.marvisa.logistic.security.entity.User;
@@ -32,6 +30,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final UserMapper userMapper;
+    private final RefreshTokenService refreshTokenService;
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -42,7 +41,7 @@ public class AuthService {
             throw new BadRequestException("El email ya existe");
         }
 
-        RoleName rol = parseRole(request.getRole().toUpperCase());
+        RoleName rol = parseRole(request.getRole());
 
         Role role = roleRepository.findByRol(rol)
                 .orElseThrow(() -> new BadRequestException("Rol no encontrado"));
@@ -58,12 +57,14 @@ public class AuthService {
 
         userRepository.save(user);
 
-        String token = jwtService.generateToken(
+        String accessToken = jwtService.generateAccessToken(
                 user,
                 Map.of("roles", user.getRoles().stream().map(r -> r.getRol().name()).toList())
         );
 
-        return new AuthResponse(token, userMapper.toResponse(user));
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+
+        return new AuthResponse(accessToken, refreshToken.getToken(), userMapper.toResponse(user));
     }
 
     public AuthResponse login(AuthRequest request) {
@@ -74,12 +75,34 @@ public class AuthService {
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new BadRequestException("Usuario no encontrado"));
 
-        String token = jwtService.generateToken(
+        String accessToken = jwtService.generateAccessToken(
                 user,
                 Map.of("roles", user.getRoles().stream().map(r -> r.getRol().name()).toList())
         );
 
-        return new AuthResponse(token, userMapper.toResponse(user));
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+
+        return new AuthResponse(accessToken, refreshToken.getToken(), userMapper.toResponse(user));
+    }
+
+    public RefreshTokenResponse refresh(RefreshTokenRequest request) {
+        RefreshToken refreshToken = refreshTokenService.verify(request.getRefreshToken());
+        User user = refreshToken.getUser();
+
+        String newAccessToken = jwtService.generateAccessToken(
+                user,
+                Map.of("roles", user.getRoles().stream().map(r -> r.getRol().name()).toList())
+        );
+
+        RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user);
+        refreshTokenService.revoke(refreshToken);
+
+        return new RefreshTokenResponse(newAccessToken, newRefreshToken.getToken());
+    }
+
+    public void logout(RefreshTokenRequest request) {
+        RefreshToken refreshToken = refreshTokenService.verify(request.getRefreshToken());
+        refreshTokenService.revoke(refreshToken);
     }
 
     public UserMeResponse me(Authentication authentication) {

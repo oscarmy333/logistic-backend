@@ -3,6 +3,7 @@ package com.marvisa.logistic.cliente.controller;
 import com.marvisa.logistic.cliente.dto.ClienteRequest;
 import com.marvisa.logistic.cliente.dto.ClienteResponse;
 import com.marvisa.logistic.cliente.service.ClienteService;
+import com.marvisa.logistic.common.pagination.PageResponse;
 import com.marvisa.logistic.common.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +19,19 @@ public class ClienteController {
     private final ClienteService clienteService;
 
     @GetMapping
-    public ApiResponse<List<ClienteResponse>> listar() {
-        return new ApiResponse<>(true, "Lista de clientes", clienteService.listar());
+    public ApiResponse<PageResponse<ClienteResponse>> listar(
+            @RequestParam(required = false) String nombres,
+            @RequestParam(required = false) Boolean activo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ) {
+        return new ApiResponse<>(
+                true,
+                "Lista de clientes",
+                clienteService.listar(nombres, activo, page, size, sortBy, direction)
+        );
     }
 
     @GetMapping("/{id}")
