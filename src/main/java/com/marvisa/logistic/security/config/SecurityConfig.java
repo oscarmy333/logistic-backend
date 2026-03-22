@@ -27,6 +27,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    private static final String ADMIN = "ADMIN";
+    private static final String OPERADOR = "OPERADOR";
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
@@ -47,10 +50,11 @@ public class SecurityConfig {
                                 "/api-docs/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
-                        .requestMatchers("/api/vendedores/**", "/api/liquidaciones/**").hasAnyRole("ADMIN", "OPERADOR")
-                        .requestMatchers("/api/repartos/**", "/api/envios/**").hasAnyRole("ADMIN", "OPERADOR", "REPARTIDOR")
-                        .requestMatchers("/api/productos/**", "/api/tipoproductos/**").hasAnyRole("ADMIN", "OPERADOR", "VENDEDOR")
-                        .requestMatchers("/api/clientes/**", "/api/documentos/**").hasAnyRole("ADMIN", "OPERADOR", "VENDEDOR", "REPARTIDOR")
+                        .requestMatchers("/api/vendedores/**", "/api/liquidaciones/**").hasAnyRole(ADMIN, OPERADOR)
+                        .requestMatchers("/api/repartos/**", "/api/envios/**").hasAnyRole(ADMIN, OPERADOR, "REPARTIDOR")
+                        .requestMatchers("/api/productos/**", "/api/tipoproductos/**").hasAnyRole(ADMIN, OPERADOR, "VENDEDOR")
+                        .requestMatchers("/api/clientes/**", "/api/documentos/**").hasAnyRole(ADMIN, OPERADOR, "VENDEDOR", "REPARTIDOR")
+                        .requestMatchers("/api/abonos/**", "/api/dashboard/**").hasAnyRole(ADMIN, OPERADOR, "COBRANZAS", "CONSULTA")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

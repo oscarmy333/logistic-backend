@@ -12,6 +12,8 @@ import com.marvisa.logistic.security.repository.RoleRepository;
 import com.marvisa.logistic.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +26,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AuthService {
 
+    private static final String ROLES = "roles";
+
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
@@ -31,6 +35,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserMapper userMapper;
     private final RefreshTokenService refreshTokenService;
+    private final LoginAttemptService loginAttemptService;
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -52,6 +57,7 @@ public class AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .enabled(true)
+                .failedLoginAttempts(0)
                 .roles(Set.of(role))
                 .build();
 
@@ -59,30 +65,41 @@ public class AuthService {
 
         String accessToken = jwtService.generateAccessToken(
                 user,
-                Map.of("roles", user.getRoles().stream().map(r -> r.getRol().name()).toList())
+                Map.of(ROLES, user.getRoles().stream().map(r -> r.getRol().name()).toList())
         );
 
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+        RefreshTokenService.TokenPair tokenPair = refreshTokenService.createRefreshToken(user);
 
-        return new AuthResponse(accessToken, refreshToken.getToken(), userMapper.toResponse(user));
+        return new AuthResponse(accessToken, tokenPair.rawToken(), userMapper.toResponse(user));
     }
 
     public AuthResponse login(AuthRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
-
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new BadRequestException("Usuario no encontrado"));
+                .orElseThrow(() -> new BadCredentialsException("Credenciales inválidas"));
+
+        if (loginAttemptService.isLocked(user)) {
+            throw new LockedException("Usuario bloqueado temporalmente");
+        }
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            );
+        } catch (Exception ex) {
+            loginAttemptService.loginFailed(user);
+            throw ex;
+        }
+
+        loginAttemptService.loginSucceeded(user);
 
         String accessToken = jwtService.generateAccessToken(
                 user,
-                Map.of("roles", user.getRoles().stream().map(r -> r.getRol().name()).toList())
+                Map.of(ROLES, user.getRoles().stream().map(r -> r.getRol().name()).toList())
         );
 
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+        RefreshTokenService.TokenPair tokenPair = refreshTokenService.createRefreshToken(user);
 
-        return new AuthResponse(accessToken, refreshToken.getToken(), userMapper.toResponse(user));
+        return new AuthResponse(accessToken, tokenPair.rawToken(), userMapper.toResponse(user));
     }
 
     public RefreshTokenResponse refresh(RefreshTokenRequest request) {
@@ -91,13 +108,13 @@ public class AuthService {
 
         String newAccessToken = jwtService.generateAccessToken(
                 user,
-                Map.of("roles", user.getRoles().stream().map(r -> r.getRol().name()).toList())
+                Map.of(ROLES, user.getRoles().stream().map(r -> r.getRol().name()).toList())
         );
 
-        RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user);
+        RefreshTokenService.TokenPair newPair = refreshTokenService.createRefreshToken(user);
         refreshTokenService.revoke(refreshToken);
 
-        return new RefreshTokenResponse(newAccessToken, newRefreshToken.getToken());
+        return new RefreshTokenResponse(newAccessToken, newPair.rawToken());
     }
 
     public void logout(RefreshTokenRequest request) {

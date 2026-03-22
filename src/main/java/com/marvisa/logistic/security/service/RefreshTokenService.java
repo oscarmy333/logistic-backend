@@ -1,6 +1,7 @@
 package com.marvisa.logistic.security.service;
 
 import com.marvisa.logistic.common.exception.BadRequestException;
+import com.marvisa.logistic.common.util.HashUtils;
 import com.marvisa.logistic.security.entity.RefreshToken;
 import com.marvisa.logistic.security.entity.User;
 import com.marvisa.logistic.security.jwt.JwtService;
@@ -22,19 +23,24 @@ public class RefreshTokenService {
     @Value("${app.jwt.refresh-expiration}")
     private long refreshExpiration;
 
-    public RefreshToken createRefreshToken(User user) {
-        RefreshToken refreshToken = RefreshToken.builder()
-                .token(jwtService.generateRefreshTokenValue())
+    public TokenPair createRefreshToken(User user) {
+        String rawToken = jwtService.generateRefreshTokenValue();
+
+        RefreshToken entity = RefreshToken.builder()
+                .tokenHash(HashUtils.sha256(rawToken))
                 .expiryDate(LocalDateTime.now().plus(refreshExpiration, ChronoUnit.MILLIS))
                 .revoked(false)
                 .user(user)
                 .build();
 
-        return refreshTokenRepository.save(refreshToken);
+        refreshTokenRepository.save(entity);
+        return new TokenPair(rawToken, entity);
     }
 
-    public RefreshToken verify(String token) {
-        RefreshToken refreshToken = refreshTokenRepository.findByTokenAndDeletedFalse(token)
+    public RefreshToken verify(String rawToken) {
+        String tokenHash = HashUtils.sha256(rawToken);
+
+        RefreshToken refreshToken = refreshTokenRepository.findByTokenHashAndDeletedFalse(tokenHash)
                 .orElseThrow(() -> new BadRequestException("Refresh token inválido"));
 
         if (Boolean.TRUE.equals(refreshToken.getRevoked())) {
@@ -54,7 +60,6 @@ public class RefreshTokenService {
         refreshTokenRepository.save(refreshToken);
     }
 
-    public void revokeAllByUser(User user) {
-        refreshTokenRepository.deleteByUser(user);
+    public record TokenPair(String rawToken, RefreshToken entity) {
     }
 }

@@ -1,8 +1,11 @@
 package com.marvisa.logistic.security.controller;
 
+import com.marvisa.logistic.common.exception.BadRequestException;
 import com.marvisa.logistic.common.response.ApiResponse;
 import com.marvisa.logistic.security.dto.*;
 import com.marvisa.logistic.security.service.AuthService;
+import com.marvisa.logistic.security.service.RateLimitService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final RateLimitService rateLimitService;
 
     @PostMapping("/register")
     public ApiResponse<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
@@ -21,7 +25,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ApiResponse<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
+    public ApiResponse<AuthResponse> login(@Valid @RequestBody AuthRequest request, HttpServletRequest httpRequest) {
+        String key = "login:" + httpRequest.getRemoteAddr();
+
+        if (!rateLimitService.allow(key)) {
+            throw new BadRequestException("Demasiados intentos de login. Intenta nuevamente en un minuto.");
+        }
+
         return new ApiResponse<>(true, "Login exitoso", authService.login(request));
     }
 

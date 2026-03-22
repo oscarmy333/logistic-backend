@@ -1,0 +1,14 @@
+#server:
+#  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://qa-db:5432/delivery_db
+    username: qa_user
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true

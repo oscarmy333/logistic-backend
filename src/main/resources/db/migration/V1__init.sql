@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS usuario (
     email VARCHAR(150) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     enabled BOOLEAN NOT NULL,
+    failed_login_attempts INTEGER NOT NULL DEFAULT 0,
+    locked_until TIMESTAMP,
     deleted BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP
@@ -25,7 +27,7 @@ CREATE TABLE IF NOT EXISTS user_roles (
 
 CREATE TABLE IF NOT EXISTS refresh_tokens (
     id BIGSERIAL PRIMARY KEY,
-    token VARCHAR(500) NOT NULL UNIQUE,
+    token_hash VARCHAR(128) NOT NULL UNIQUE,
     expiry_date TIMESTAMP NOT NULL,
     revoked BOOLEAN NOT NULL DEFAULT FALSE,
     user_id BIGINT NOT NULL,
@@ -102,3 +104,61 @@ INSERT INTO perfil_usuario(rol) VALUES ('ROLE_ADMIN') ON CONFLICT (rol) DO NOTHI
 INSERT INTO perfil_usuario(rol) VALUES ('ROLE_OPERADOR') ON CONFLICT (rol) DO NOTHING;
 INSERT INTO perfil_usuario(rol) VALUES ('ROLE_VENDEDOR') ON CONFLICT (rol) DO NOTHING;
 INSERT INTO perfil_usuario(rol) VALUES ('ROLE_REPARTIDOR') ON CONFLICT (rol) DO NOTHING;
+
+create table clientes (
+  id bigserial primary key,
+  tipo_documento varchar(20) not null,
+  numero_documento varchar(30) not null unique,
+  nombres varchar(200) not null,
+  telefono varchar(30),
+  email varchar(120),
+  direccion varchar(255),
+  activo boolean not null default true,
+  created_at timestamp not null default now(),
+  updated_at timestamp
+);
+
+create table documentos_cobranza (
+  id bigserial primary key,
+  cliente_id bigint not null references clientes(id),
+  glosa varchar(255) not null,
+  monto_original numeric(14,2) not null,
+  saldo_pendiente numeric(14,2) not null,
+  fecha_emision date not null,
+  fecha_vencimiento date not null,
+  estado varchar(20) not null,
+  observacion varchar(255),
+  activo boolean not null default true,
+  created_at timestamp not null default now(),
+  updated_at timestamp
+);
+
+create table abonos (
+  id bigserial primary key,
+  documento_id bigint not null references documentos_cobranza(id),
+  monto numeric(14,2) not null,
+  fecha_abono timestamp not null,
+  medio_pago varchar(50),
+  referencia varchar(100),
+  observacion varchar(255),
+  created_at timestamp not null default now()
+);
+
+create table roles (
+  id bigserial primary key,
+  nombre varchar(50) not null unique
+);
+
+create table usuarios (
+  id bigserial primary key,
+  username varchar(80) not null unique,
+  password varchar(255) not null,
+  enabled boolean not null default true
+);
+
+create table usuarios_roles (
+  usuario_id bigint not null references usuarios(id),
+  rol_id bigint not null references roles(id),
+  primary key (usuario_id, rol_id)
+);
+

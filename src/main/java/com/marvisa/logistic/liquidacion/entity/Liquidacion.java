@@ -4,6 +4,8 @@ import com.marvisa.logistic.common.audit.AuditableEntity;
 import com.marvisa.logistic.vendedor.entity.Vendedor;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,6 +17,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SQLDelete(sql = "UPDATE liquidacion SET deleted = true, updated_at = now() WHERE id = ?")
+@SQLRestriction("deleted = false")
 public class Liquidacion extends AuditableEntity {
 
     @Id

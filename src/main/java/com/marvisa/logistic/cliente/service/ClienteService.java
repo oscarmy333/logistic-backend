@@ -5,6 +5,7 @@ import com.marvisa.logistic.cliente.dto.ClienteResponse;
 import com.marvisa.logistic.cliente.entity.Cliente;
 import com.marvisa.logistic.cliente.mapper.ClienteMapper;
 import com.marvisa.logistic.cliente.repository.ClienteRepository;
+import com.marvisa.logistic.cliente.spec.ClienteSpecifications;
 import com.marvisa.logistic.common.exception.ResourceNotFoundException;
 import com.marvisa.logistic.common.pagination.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,33 +15,34 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ClienteService {
 
-    private final boolean CLIENTE_ACTIVO = true;
+    private static final boolean CLIENTE_ACTIVO = true;
 
     private final ClienteRepository clienteRepository;
     private final ClienteMapper clienteMapper;
 
-    public PageResponse<ClienteResponse> listar(String nombres, Boolean activo, int page, int size, String sortBy, String direction) {
+    public PageResponse<ClienteResponse> listar(
+            String nombres,
+            String email,
+            Boolean activo,
+            int page,
+            int size,
+            String sortBy,
+            String direction) {
         Sort sort = direction.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Cliente> result;
-
-        if (nombres != null && !nombres.isBlank() && activo != null) {
-            result = clienteRepository.findByDeletedFalseAndNombresContainingIgnoreCaseAndActivo(nombres, activo, pageable);
-        } else if (activo != null) {
-            result = clienteRepository.findByDeletedFalseAndActivo(activo, pageable);
-        } else {
-            result = clienteRepository.findByDeletedFalse(pageable);
-        }
+        Page<Cliente> result = clienteRepository.findAll(
+                ClienteSpecifications.filter(nombres, email, activo),
+                pageable
+        );
 
         return new PageResponse<>(
                 clienteMapper.toResponseList(result.getContent()),
@@ -63,7 +65,7 @@ public class ClienteService {
                 .codigo(request.getCodigo())
                 .nombres(request.getNombres())
                 .apellidos(request.getApellidos())
-                .correo(request.getEmail())
+                .email(request.getEmail())
                 .telefono(request.getTelefono())
                 .direccion(request.getDireccion())
                 .activo(request.getActivo() != null ? request.getActivo() : CLIENTE_ACTIVO)
@@ -78,7 +80,7 @@ public class ClienteService {
 
         cliente.setNombres(request.getNombres());
         cliente.setApellidos(request.getApellidos());
-        cliente.setCorreo(request.getEmail());
+        cliente.setEmail(request.getEmail());
         cliente.setTelefono(request.getTelefono());
         cliente.setDireccion(request.getDireccion());
         cliente.setActivo(request.getActivo() != null ? request.getActivo() : cliente.getActivo());

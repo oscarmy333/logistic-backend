@@ -9,7 +9,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/clientes")
@@ -21,6 +20,7 @@ public class ClienteController {
     @GetMapping
     public ApiResponse<PageResponse<ClienteResponse>> listar(
             @RequestParam(required = false) String nombres,
+            @RequestParam(required = false) String email,
             @RequestParam(required = false) Boolean activo,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -30,7 +30,8 @@ public class ClienteController {
         return new ApiResponse<>(
                 true,
                 "Lista de clientes",
-                clienteService.listar(nombres, activo, page, size, sortBy, direction)
+                //clienteService.listar(nombres, activo, page, size, sortBy, direction)
+                clienteService.listar(nombres, email, activo, page, size, sortBy, direction)
         );
     }
 

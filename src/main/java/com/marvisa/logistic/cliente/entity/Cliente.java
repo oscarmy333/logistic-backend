@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class Cliente extends AuditableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    //@Column(nullable = false, unique = true)
     private String codigo;
 
     @Column(nullable = false)
@@ -47,8 +48,9 @@ public class Cliente extends AuditableEntity {
 
     private String ruc;
 
-    private String correo;
+    private String email;
 
+    @Column(nullable = false)
     private Boolean activo;
 
     @OneToMany(mappedBy = "cliente")

@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: logistic
+  profiles:
+    active: dev
+
+server:
+  port: 8080
+#  jackson:
+#    serialization:
+#      write-dates-as-timestamps: false
+
+app:
+  jwt:
+    secret: VGhpc0lzQVN1cGVyU2VjcmV0S2V5Rm9ySldUMTIzNDU2Nzg5MDEyMzQ1Njc4OTA=
+    access-expiration: 900000
+    refresh-expiration: 604800000
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

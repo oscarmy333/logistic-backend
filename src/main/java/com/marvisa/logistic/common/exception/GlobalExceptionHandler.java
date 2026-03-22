@@ -50,6 +50,12 @@ public class GlobalExceptionHandler {
                 .body(new ApiResponse<>(false, message, null));
     }
 
+    @ExceptionHandler(org.springframework.security.authentication.LockedException.class)
+    public ResponseEntity<ApiResponse<String>> handleLocked(org.springframework.security.authentication.LockedException ex) {
+        return ResponseEntity.status(HttpStatus.LOCKED)
+                .body(new ApiResponse<>(false, ex.getMessage(), null));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<String>> handleGeneric(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

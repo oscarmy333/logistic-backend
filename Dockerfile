@@ -6,6 +6,9 @@ RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /logistic
-COPY target/logistic.jar logistic.jar
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
+
+COPY --from=builder /logistic/target/logistic-0.0.1-SNAPSHOT.jar logistic.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "logistic.jar"]
