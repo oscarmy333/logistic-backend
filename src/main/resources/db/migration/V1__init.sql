@@ -107,8 +107,8 @@ INSERT INTO perfil_usuario(rol) VALUES ('ROLE_REPARTIDOR') ON CONFLICT (rol) DO 
 
 create table clientes (
   id bigserial primary key,
-  tipo_documento varchar(20) not null,
-  numero_documento varchar(30) not null unique,
+  codigo varchar(30) not null unique,
+  documento_identidad varchar(20),
   nombres varchar(200) not null,
   telefono varchar(30),
   email varchar(120),
@@ -123,10 +123,10 @@ create table documentos_cobranza (
   cliente_id bigint not null references clientes(id),
   glosa varchar(255) not null,
   monto_original numeric(14,2) not null,
-  saldo_pendiente numeric(14,2) not null,
-  fecha_emision date not null,
+  fecha_emision date,
   fecha_vencimiento date not null,
   estado varchar(20) not null,
+  saldo_pendiente numeric(14,2) not null,
   observacion varchar(255),
   activo boolean not null default true,
   created_at timestamp not null default now(),
@@ -135,13 +135,14 @@ create table documentos_cobranza (
 
 create table abonos (
   id bigserial primary key,
-  documento_id bigint not null references documentos_cobranza(id),
+  documento_cobranza_id bigint not null references documentos_cobranza(id),
   monto numeric(14,2) not null,
   fecha_abono timestamp not null,
   medio_pago varchar(50),
   referencia varchar(100),
   observacion varchar(255),
-  created_at timestamp not null default now()
+  created_at timestamp not null default now(),
+  updated_at timestamp
 );
 
 create table roles (
@@ -153,7 +154,11 @@ create table usuarios (
   id bigserial primary key,
   username varchar(80) not null unique,
   password varchar(255) not null,
-  enabled boolean not null default true
+  nombres varchar(150),
+  email varchar(120),
+  enabled boolean not null default true,
+  created_at timestamp not null default now(),
+  updated_at timestamp
 );
 
 create table usuarios_roles (

@@ -25,6 +25,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,7 +36,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@SQLDelete(sql = "UPDATE users SET deleted = true, updated_at = now() WHERE id = ?")
+@SQLDelete(sql = "UPDATE usuario SET deleted = true, updated_at = now() WHERE id = ?")
 @SQLRestriction("deleted = false")
 public class User extends AuditableEntity implements UserDetails {
 
@@ -72,7 +73,7 @@ public class User extends AuditableEntity implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private transient Set<Role> roles;
+    private transient Set<Role> roles = new HashSet<>();
 
     @Override
     @NullMarked

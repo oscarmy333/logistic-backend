@@ -2,6 +2,7 @@ package com.marvisa.logistic.security.config;
 
 
 import com.marvisa.logistic.config.CorsConfig;
+import com.marvisa.logistic.security.jwt.JwtAccessDeniedHandler;
 import com.marvisa.logistic.security.jwt.JwtAuthenticationEntryPoint;
 import com.marvisa.logistic.security.jwt.JwtAuthenticationFilter;
 import com.marvisa.logistic.security.service.CustomUserDetailsService;
@@ -34,6 +35,7 @@ public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
     private final CorsConfig corsConfig;
+    private final JwtAccessDeniedHandler accessDeniedHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
@@ -41,14 +43,18 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/api-docs/**",
-                                "/v3/api-docs/**"
+                                "/v3/api-docs/**",
+                                "/actuator/health",
+                                "/actuator/info"
                         ).permitAll()
                         .requestMatchers("/api/vendedores/**", "/api/liquidaciones/**").hasAnyRole(ADMIN, OPERADOR)
                         .requestMatchers("/api/repartos/**", "/api/envios/**").hasAnyRole(ADMIN, OPERADOR, "REPARTIDOR")

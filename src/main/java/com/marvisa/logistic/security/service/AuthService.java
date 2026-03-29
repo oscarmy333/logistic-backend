@@ -11,6 +11,7 @@ import com.marvisa.logistic.security.mapper.UserMapper;
 import com.marvisa.logistic.security.repository.RoleRepository;
 import com.marvisa.logistic.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -78,6 +80,7 @@ public class AuthService {
                 .orElseThrow(() -> new BadCredentialsException("Credenciales inválidas"));
 
         if (loginAttemptService.isLocked(user)) {
+            log.warn("Usuario bloqueado temporalmente por múltiples intentos fallidos: {}", user.getUsername());
             throw new LockedException("Usuario bloqueado temporalmente");
         }
 
@@ -98,7 +101,7 @@ public class AuthService {
         );
 
         RefreshTokenService.TokenPair tokenPair = refreshTokenService.createRefreshToken(user);
-
+        log.info("Login exitoso para usuario {}", user.getUsername());
         return new AuthResponse(accessToken, tokenPair.rawToken(), userMapper.toResponse(user));
     }
 
@@ -113,7 +116,7 @@ public class AuthService {
 
         RefreshTokenService.TokenPair newPair = refreshTokenService.createRefreshToken(user);
         refreshTokenService.revoke(refreshToken);
-
+        log.info("Refresh token rotado para usuario {}", user.getUsername());
         return new RefreshTokenResponse(newAccessToken, newPair.rawToken());
     }
 
