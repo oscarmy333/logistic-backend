@@ -136,6 +136,8 @@ public class AuthService {
             case "ROLE_OPERADOR", "OPERADOR" -> RoleName.ROLE_OPERADOR;
             case "ROLE_VENDEDOR", "VENDEDOR" -> RoleName.ROLE_VENDEDOR;
             case "ROLE_REPARTIDOR", "REPARTIDOR" -> RoleName.ROLE_REPARTIDOR;
+            case "ROLE_COBRANZA", "COBRANZA" -> RoleName.ROLE_COBRANZA;
+            case "ROLE_LECTOR", "LECTOR" -> RoleName.ROLE_LECTOR;
             default -> throw new BadRequestException("Rol inválido");
         };
     }

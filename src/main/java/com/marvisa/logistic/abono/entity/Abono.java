@@ -1,6 +1,6 @@
 package com.marvisa.logistic.abono.entity;
 
-import com.marvisa.logistic.cobranza.entity.DocumentoCobranza;
+import com.marvisa.logistic.documento.entity.DocumentoCobranza;
 import com.marvisa.logistic.common.audit.AuditableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,7 +11,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -23,6 +26,9 @@ import java.time.LocalDateTime;
 @Table(schema = "public", name = "abono")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @SQLDelete(sql = "UPDATE abono SET deleted = true, updated_at = now() WHERE id = ?")
 @SQLRestriction("deleted = false")
 public class Abono extends AuditableEntity {

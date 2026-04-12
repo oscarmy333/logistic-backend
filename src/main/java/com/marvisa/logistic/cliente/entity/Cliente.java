@@ -51,7 +51,7 @@ public class Cliente extends AuditableEntity {
     private String email;
 
     @Column(nullable = false)
-    private Boolean activo;
+    private Boolean activo = true;
 
     @OneToMany(mappedBy = "cliente")
     @Builder.Default

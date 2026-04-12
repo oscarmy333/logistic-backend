@@ -46,13 +46,13 @@ public class User extends AuditableEntity implements UserDetails {
 
     private String codigo;
 
-    @Column(name = "full_name", nullable = false)
+    @Column(name = "full_name", nullable = false, length = 150)
     private String fullName;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 50)
     private String username;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 120)
     private String email;
 
     @Column(nullable = false)
@@ -73,6 +73,7 @@ public class User extends AuditableEntity implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+    @Builder.Default
     private transient Set<Role> roles = new HashSet<>();
 
     @Override

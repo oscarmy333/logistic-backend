@@ -60,7 +60,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/repartos/**", "/api/envios/**").hasAnyRole(ADMIN, OPERADOR, "REPARTIDOR")
                         .requestMatchers("/api/productos/**", "/api/tipoproductos/**").hasAnyRole(ADMIN, OPERADOR, "VENDEDOR")
                         .requestMatchers("/api/clientes/**", "/api/documentos/**").hasAnyRole(ADMIN, OPERADOR, "VENDEDOR", "REPARTIDOR")
-                        .requestMatchers("/api/abonos/**", "/api/dashboard/**").hasAnyRole(ADMIN, OPERADOR, "COBRANZAS", "CONSULTA")
+                        .requestMatchers("/api/abonos/**", "/api/dashboard/**").hasAnyRole(ADMIN, OPERADOR, "COBRANZA", "LECTOR")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
