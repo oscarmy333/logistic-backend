@@ -1,6 +1,6 @@
 package com.marvisa.logistic.abono.calculator;
 
-import com.marvisa.logistic.common.enums.EstadoDocumento;
+import com.marvisa.logistic.documento.enums.EstadoDocumento;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

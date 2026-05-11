@@ -1,28 +1,26 @@
 CREATE TABLE IF NOT EXISTS perfil_usuario (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE
+    id bigserial primary key,
+    nombre varchar(50) not null unique
 );
 
 CREATE TABLE IF NOT EXISTS usuario (
-    id BIGSERIAL PRIMARY KEY,
-    full_name VARCHAR(150) NOT NULL,
-    username VARCHAR(100) NOT NULL UNIQUE,
-    email VARCHAR(150) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    enabled BOOLEAN NOT NULL,
+    id bigserial primary key,
+    username varchar(50) not null unique,
+    password varchar(255) not null,
+    nombres varchar(150),
+    email varchar(120),
+    enabled boolean not null default true,
     failed_login_attempts INTEGER NOT NULL DEFAULT 0,
     locked_until TIMESTAMP,
     deleted BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP
+    created_at timestamp not null default now(),
+    updated_at timestamp not null default now()
 );
 
 CREATE TABLE IF NOT EXISTS user_roles (
-    user_id BIGINT NOT NULL,
-    role_id BIGINT NOT NULL,
-    PRIMARY KEY (user_id, role_id),
-    CONSTRAINT fk_user_roles_user FOREIGN KEY (user_id) REFERENCES usuario(id),
-    CONSTRAINT fk_user_roles_role FOREIGN KEY (role_id) REFERENCES perfil_usuario(id)
+    usuario_id bigint not null references usuarios(id) on delete cascade,
+    rol_id bigint not null references roles(id) on delete cascade,
+    primary key (usuario_id, rol_id)
 );
 
 CREATE TABLE IF NOT EXISTS refresh_tokens (
@@ -38,16 +36,19 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
 );
 
 CREATE TABLE IF NOT EXISTS cliente (
-    id BIGSERIAL PRIMARY KEY,
-    nombres VARCHAR(100) NOT NULL,
+    id bigserial primary key,
+    codigo varchar(30) not null unique,
+    nombres varchar(100) not null,
     apellidos VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
-    telefono VARCHAR(20),
-    direccion VARCHAR(255),
+    documento_identidad varchar(20),
+    telefono varchar(20),
+    email varchar(120),
+    direccion varchar(255),
     activo BOOLEAN NOT NULL,
     deleted BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP
+    created_at timestamp not null default now(),
+    updated_at timestamp not null default now()
 );
 
 CREATE TABLE IF NOT EXISTS envio (
@@ -105,18 +106,20 @@ INSERT INTO perfil_usuario(rol) VALUES ('ROLE_OPERADOR') ON CONFLICT (rol) DO NO
 INSERT INTO perfil_usuario(rol) VALUES ('ROLE_VENDEDOR') ON CONFLICT (rol) DO NOTHING;
 INSERT INTO perfil_usuario(rol) VALUES ('ROLE_REPARTIDOR') ON CONFLICT (rol) DO NOTHING;
 
+/*
 create table clientes (
   id bigserial primary key,
   codigo varchar(30) not null unique,
+  nombres varchar(150) not null,
   documento_identidad varchar(20),
-  nombres varchar(200) not null,
-  telefono varchar(30),
+  telefono varchar(20),
   email varchar(120),
   direccion varchar(255),
   activo boolean not null default true,
   created_at timestamp not null default now(),
-  updated_at timestamp
+  updated_at timestamp not null default now()
 );
+*/
 
 create table documentos_cobranza (
   id bigserial primary key,
@@ -130,7 +133,7 @@ create table documentos_cobranza (
   observacion varchar(255),
   activo boolean not null default true,
   created_at timestamp not null default now(),
-  updated_at timestamp
+  updated_at timestamp not null default now()
 );
 
 create table abonos (
@@ -141,10 +144,11 @@ create table abonos (
   medio_pago varchar(50),
   referencia varchar(100),
   observacion varchar(255),
-  created_at timestamp not null default now(),
-  updated_at timestamp
+  created_by varchar(100),
+  created_at timestamp not null default now()
 );
 
+/*
 create table roles (
   id bigserial primary key,
   nombre varchar(50) not null unique
@@ -167,3 +171,4 @@ create table usuarios_roles (
   primary key (usuario_id, rol_id)
 );
 
+*/

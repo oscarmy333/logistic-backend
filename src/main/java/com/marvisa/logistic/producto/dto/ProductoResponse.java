@@ -10,7 +10,7 @@ public class ProductoResponse {
     private String codigo;
     private String nombre;
     private String descripcion;
-    private TipoProductoRequest tipoProductoRequest;
+    //private TipoProductoRequest tipoProductoRequest;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

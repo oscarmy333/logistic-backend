@@ -16,7 +16,7 @@ public class RepartoResponse {
     private String clienteNombreCompleto;
 
     private Long envioId;
-    private String codigoSeguimiento;
+    private String codigo;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

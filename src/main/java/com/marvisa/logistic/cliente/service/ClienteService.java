@@ -6,6 +6,7 @@ import com.marvisa.logistic.cliente.entity.Cliente;
 import com.marvisa.logistic.cliente.mapper.ClienteMapper;
 import com.marvisa.logistic.cliente.repository.ClienteRepository;
 import com.marvisa.logistic.cliente.spec.ClienteSpecifications;
+import com.marvisa.logistic.common.exception.BadRequestException;
 import com.marvisa.logistic.common.exception.ResourceNotFoundException;
 import com.marvisa.logistic.common.pagination.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class ClienteService {
 
     public PageResponse<ClienteResponse> listar(
             String nombres,
+            String apellidos,
             String email,
             Boolean activo,
             int page,
@@ -40,7 +42,7 @@ public class ClienteService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<Cliente> result = clienteRepository.findAll(
-                ClienteSpecifications.filter(nombres, email, activo),
+                ClienteSpecifications.filter(nombres, apellidos, email, activo),
                 pageable
         );
 
@@ -65,6 +67,9 @@ public class ClienteService {
                 .codigo(request.getCodigo())
                 .nombres(request.getNombres())
                 .apellidos(request.getApellidos())
+                .nombreComercial(request.getNombreComercial())
+                .dni(request.getDni())
+                .ruc(request.getRuc())
                 .email(request.getEmail())
                 .telefono(request.getTelefono())
                 .direccion(request.getDireccion())
@@ -78,8 +83,16 @@ public class ClienteService {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado - sin actualizar: " + id));
 
+        if (!cliente.getCodigo().equals(request.getCodigo()) &&
+                clienteRepository.existsByCodigo(request.getCodigo())) {
+            throw new BadRequestException("Ya existe un cliente con el código: " + request.getCodigo());
+        }
+        cliente.setCodigo(request.getCodigo());
         cliente.setNombres(request.getNombres());
         cliente.setApellidos(request.getApellidos());
+        cliente.setNombreComercial(request.getNombreComercial());
+        cliente.setDni(request.getDni());
+        cliente.setRuc(request.getRuc());
         cliente.setEmail(request.getEmail());
         cliente.setTelefono(request.getTelefono());
         cliente.setDireccion(request.getDireccion());

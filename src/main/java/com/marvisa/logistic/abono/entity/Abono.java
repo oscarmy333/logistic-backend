@@ -36,8 +36,11 @@ public class Abono extends AuditableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 11)
+    private String codigo;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "documento_id")
+    @JoinColumn(name = "documento_cobranza_id", nullable = false)
     private DocumentoCobranza documento;
 
     @Column(nullable = false, precision = 14, scale = 2)

@@ -1,4 +1,4 @@
-package com.marvisa.logistic.common.enums;
+package com.marvisa.logistic.documento.enums;
 
 public enum EstadoDocumento {
     PAGADO,

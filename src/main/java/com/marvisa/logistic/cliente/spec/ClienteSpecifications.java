@@ -8,9 +8,10 @@ public class ClienteSpecifications {
     private ClienteSpecifications() {
     }
 
-    public static Specification<Cliente> filter(String nombres, String email, Boolean activo) {
+    public static Specification<Cliente> filter(String nombres, String apellidos, String email, Boolean activo) {
         return Specification.where(SpecificationBuilder.<Cliente>isFalse("deleted"))
                 .and(SpecificationBuilder.likeIgnoreCase("nombres", nombres))
+                .and(SpecificationBuilder.likeIgnoreCase("apellidos", apellidos))
                 .and(SpecificationBuilder.likeIgnoreCase("email", email))
                 .and(SpecificationBuilder.equal("activo", activo));
     }

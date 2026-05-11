@@ -23,6 +23,7 @@ public class ClienteController {
     @PreAuthorize("hasAnyRole('ADMIN','OPERADOR','VENDEDOR','REPARTIDOR')")
     public ApiResponse<PageResponse<ClienteResponse>> listar(
             @RequestParam(required = false) String nombres,
+            @RequestParam(required = false) String apellidos,
             @RequestParam(required = false) String email,
             @RequestParam(required = false) Boolean activo,
             @RequestParam(defaultValue = "0") int page,
@@ -34,7 +35,7 @@ public class ClienteController {
                 true,
                 "Lista de clientes",
                 //clienteService.listar(nombres, activo, page, size, sortBy, direction)
-                clienteService.listar(nombres, email, activo, page, size, sortBy, direction)
+                clienteService.listar(nombres, apellidos, email, activo, page, size, sortBy, direction)
         );
     }
 

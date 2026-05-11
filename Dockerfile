@@ -1,14 +1,17 @@
-FROM maven:3.9.8-eclipse-temurin-17 AS builder
-WORKDIR /logistic
-COPY pom.xml .
+FROM eclipse-temurin:17-jdk
+
+WORKDIR /app
+
+COPY .mvn/ .mvn
+COPY mvnw pom.xml ./
+
+RUN chmod +x mvnw
+&& ./mvnw -q -DskipTests dependency:go-offline
+
 COPY src ./src
-RUN mvn clean package -DskipTests
 
-FROM eclipse-temurin:17-jdk-alpine
-WORKDIR /logistic
-RUN addgroup -S spring && adduser -S spring -G spring
-USER spring:spring
+RUN ./mvnw -q -DskipTests clean package
 
-COPY --from=builder /logistic/target/logistic-0.0.6-SNAPSHOT.jar logistic.jar
+COPY --from=builder /logistic/target/logistic-0.0.8-SNAPSHOT.jar logistic.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "logistic.jar"]

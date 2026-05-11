@@ -22,15 +22,26 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        Role adminRole = roleRepository.findByRol(RoleName.ROLE_ADMIN)
-                .orElseGet(() -> roleRepository.save(Role.builder().rol(RoleName.ROLE_ADMIN).build()));
+        if (userRepository.existsByUsername("admin")) {
+            return;
+        }
 
-        Role cobranzaRole = roleRepository.findByRol(RoleName.ROLE_COBRANZA)
-                .orElseGet(() -> roleRepository.save(Role.builder().rol(RoleName.ROLE_COBRANZA).build()));
+        Role adminRol = roleRepository.findByRol(RoleName.ROLE_ADMIN)
+                .orElseThrow(() -> new IllegalStateException("No existe el rol ROLE_ADMIN"));
 
-        Role lectorRole = roleRepository.findByRol(RoleName.ROLE_LECTOR)
-                .orElseGet(() -> roleRepository.save(Role.builder().rol(RoleName.ROLE_LECTOR).build()));
+        String inputString = System.getenv("SECRET");
 
+        User admin = User.builder()
+                .username("admin")
+                .password(passwordEncoder.encode(inputString))
+                .fullName("Administrador")
+                .email("admin@marvisa.com")
+                .enabled(true)
+                .roles(Set.of(adminRol))
+                .failedLoginAttempts(0)
+                .build();
+
+        userRepository.save(admin);
 
     }
 }

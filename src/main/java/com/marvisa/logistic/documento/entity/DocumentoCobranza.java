@@ -2,7 +2,7 @@ package com.marvisa.logistic.documento.entity;
 
 import com.marvisa.logistic.cliente.entity.Cliente;
 import com.marvisa.logistic.common.audit.AuditableEntity;
-import com.marvisa.logistic.common.enums.EstadoDocumento;
+import com.marvisa.logistic.documento.enums.EstadoDocumento;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -44,10 +44,10 @@ public class DocumentoCobranza extends AuditableEntity {
     private String codigo;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "cliente_id")
+    @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     private String glosa;
 
     @Column(name = "monto_original", nullable = false, precision = 14, scale = 2)
@@ -70,5 +70,6 @@ public class DocumentoCobranza extends AuditableEntity {
     private String observacion;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean activo = true;
 }

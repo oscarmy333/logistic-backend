@@ -1,6 +1,5 @@
 package com.marvisa.logistic.abono.service;
 
-import com.marvisa.logistic.abono.calculator.DocumentoEstadoCalculator;
 import com.marvisa.logistic.abono.dto.AbonoRequest;
 import com.marvisa.logistic.abono.dto.AbonoResponse;
 import com.marvisa.logistic.abono.entity.Abono;
@@ -25,14 +24,13 @@ public class AbonoService {
 
     private final AbonoRepository abonoRepository;
     private final DocumentoCobranzaRepository documentoRepository;
-    private final DocumentoEstadoCalculator estadoCalculator;
     private final DocumentoCobranzaService documentoService;
     private final AbonoMapper abonoMapper;
 
     @Transactional
-    public AbonoResponse registrar(AbonoRequest request) {
-        DocumentoCobranza documento = documentoRepository.findById(request.getDocumentoId())
-                .orElseThrow(() -> new ResourceNotFoundException("Documento no encontrado"));
+    public AbonoResponse registrar(Long documentoId, AbonoRequest request, String username) {
+        DocumentoCobranza documento = documentoRepository.findById(documentoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Documento no encontrado: " + documentoId));
 
         if (request.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("El abono debe ser mayor a cero");
@@ -42,24 +40,28 @@ public class AbonoService {
             throw new IllegalStateException("El documento ya está pagado");
         }
 
+        documentoService.recalcularEstadoYSaldo(documento);
+
         if (request.getMonto().compareTo(documento.getSaldoPendiente()) > 0) {
             throw new BadRequestException("El abono no puede exceder el saldo pendiente");
         }
 
         Abono abono = Abono.builder()
                 .documento(documento)
+                .codigo(request.getCodigo())
                 .monto(request.getMonto())
-                .fechaAbono(LocalDateTime.now())
+                .fechaAbono(request.getFechaAbono() == null ? LocalDateTime.now() : request.getFechaAbono())
+                .medioPago(request.getMedioPago())
+                .referencia(request.getReferencia())
+                .observacion(request.getObservacion())
                 .build();
 
-        documento.setSaldoPendiente(documento.getSaldoPendiente().subtract(request.getMonto()));
-        documento.setEstado(estadoCalculator.calcular(documento.getSaldoPendiente(), documento.getFechaVencimiento()));
-        documentoService.recalcularEstadoYSaldo(documento);
+        Abono guardado = abonoRepository.save(abono);
 
-        abonoRepository.save(abono);
+        documentoService.recalcularEstadoYSaldo(documento);
         documentoRepository.save(documento);
 
-        return abonoMapper.toResponse(abono);
+        return abonoMapper.toResponse(guardado);
     }
 
     public List<AbonoResponse> listarPorDocumento(Long documentoId) {
